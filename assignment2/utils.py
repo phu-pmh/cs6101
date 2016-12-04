@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 import numpy as np
+from past.builtins import xrange
 
 class Vocab(object):
   def __init__(self):
@@ -22,7 +23,7 @@ class Vocab(object):
     for word in words:
       self.add_word(word)
     self.total_words = float(sum(self.word_freq.values()))
-    print '{} total words with {} uniques'.format(self.total_words, len(self.word_freq))
+    print ('{} total words with {} uniques'.format(self.total_words, len(self.word_freq)))
 
   def encode(self, word):
     if word not in self.word_to_index:

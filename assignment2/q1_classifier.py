@@ -33,6 +33,7 @@ class SoftmaxModel(Model):
         self.config.n_samples, self.config.n_features)
     self.input_labels = np.ones((self.config.n_samples,), dtype=np.int32)
 
+
   def add_placeholders(self):
     """Generate placeholder variables to represent the input tensors.
 
@@ -54,7 +55,9 @@ class SoftmaxModel(Model):
     (Don't change the variable names)
     """
     ### YOUR CODE HERE
-    raise NotImplementedError
+    self.input_placeholder = tf.placeholder(tf.float32,
+        (self.config.batch_size, self.config.n_features))
+    self.labels_placeholder = tf.placeholder(tf.float32, (self.config.batch_size, self.config.n_classes))
     ### END YOUR CODE
 
   def create_feed_dict(self, input_batch, label_batch):
@@ -79,7 +82,10 @@ class SoftmaxModel(Model):
       feed_dict: The feed dictionary mapping from placeholders to values.
     """
     ### YOUR CODE HERE
-    raise NotImplementedError
+    feed_dict = {
+                 self.input_placeholder : input_batch,
+                 self.labels_placeholder : label_batch
+                 }
     ### END YOUR CODE
     return feed_dict
 
@@ -103,7 +109,8 @@ class SoftmaxModel(Model):
       train_op: The Op for training.
     """
     ### YOUR CODE HERE
-    raise NotImplementedError
+    optimizer = tf.train.GradientDescentOptimizer(self.config.lr)
+    train_op = optimizer.minimize(loss)
     ### END YOUR CODE
     return train_op
 
@@ -127,7 +134,11 @@ class SoftmaxModel(Model):
       out: A tensor of shape (batch_size, n_classes)
     """
     ### YOUR CODE HERE
-    raise NotImplementedError
+    with tf.variable_scope("model"):
+        W = tf.get_variable(name="W", shape=[self.config.n_features, self.config.n_classes])
+        b = tf.get_variable(name="b", shape=[self.config.n_classes])
+        out = softmax(tf.matmul(input_data,W) + b)
+    
     ### END YOUR CODE
     return out
 
@@ -142,7 +153,7 @@ class SoftmaxModel(Model):
       loss: A 0-d tensor (scalar)
     """
     ### YOUR CODE HERE
-    raise NotImplementedError
+    loss = cross_entropy_loss(self.labels_placeholder, pred)
     ### END YOUR CODE
     return loss
 
@@ -233,7 +244,7 @@ def test_SoftmaxModel():
   # If ops are implemented correctly, the average loss should fall close to zero
   # rapidly.
   assert losses[-1] < .5
-  print "Basic (non-exhaustive) classifier tests pass\n"
+  print("Basic (non-exhaustive) classifier tests pass\n")
 
 if __name__ == "__main__":
     test_SoftmaxModel()
