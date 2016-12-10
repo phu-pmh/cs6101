@@ -121,7 +121,8 @@ class NERModel(LanguageModel):
     ### YOUR CODE HERE
     feed_dict = {
                  self.input_placeholder : input_batch,
-                 self.labels_placeholder : label_batch
+                 self.labels_placeholder : label_batch,
+                 self.dropout_placeholder: dropout
                  }
     ### END YOUR CODE
     return feed_dict
@@ -153,11 +154,11 @@ class NERModel(LanguageModel):
     # The embedding lookup is currently only implemented for the CPU
     with tf.device('/cpu:0'):
       ### YOUR CODE HERE
-      with tt.variable_scope("embedding_scope") as emb_scope:
+      with tf.variable_scope("embedding_scope") as emb_scope:
           embeddings = tf.get_variable("embeddings", shape = [len(self.wv), self.config.embed_size],
                                        dtype = tf.float32)
           window = tf.nn.embedding_lookup(embeddings, self.input_placeholder)
-          window = tf.reshape(window, shape = [-1,self.config.window_size, self.config.embed_size])
+          window = tf.reshape(window, shape = [-1,self.config.window_size * self.config.embed_size])
       ### END YOUR CODE
       return window
 
@@ -192,7 +193,7 @@ class NERModel(LanguageModel):
     with tf.variable_scope("Layer1") as layer_scope:
         W = tf.get_variable("W1", shape = [self.config.window_size*self.config.embed_size,
                                           self.config.hidden_size],
-                                          initializer = xavier_weight_init)
+                                          initializer = xavier_weight_init())
         
         b1 = tf.get_variable("b1", shape=(self.config.hidden_size,))
         h1 = tf.nn.tanh(tf.matmul(window,W) + b1)
@@ -201,7 +202,7 @@ class NERModel(LanguageModel):
     with tf.variable_scope("hidden") as softmax_scope:
         U = tf.get_variable("W2", shape = [self.config.hidden_size,
                                           self.config.label_size],
-                                          initializer = xavier_weight_init)
+                                          initializer = xavier_weight_init())
         
         b2 = tf.get_variable("b2", shape=(self.config.label_size,))
         h2 = tf.nn.tanh(tf.matmul(h1, U) + b2)
